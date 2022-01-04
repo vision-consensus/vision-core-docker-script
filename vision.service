@@ -1,0 +1,18 @@
+[Unit]
+Description=vision: blockchain
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=root
+Group=root
+LimitNOFILE=65536
+Type=forking
+ExecStart=/opt/vision/start
+ExecStop=/bin/kill -TERM ${MAINPID}
+ExecReload=/bin/kill -HUP ${MAINPID}
+Restart=always
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,103 @@
+#! /usr/bin/env bash
+set -e
+
+export LD_PRELOAD="/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4"
+export TCMALLOC_RELEASE_RATE=10
+export VISION_HOME="/data/vision"
+export CONFIGHOME="$VISION_HOME/configs"
+export DATABASEHOME="$VISION_HOME/output-directory"
+
+function main() {
+  echo ""
+  echo "Starting Vision Quickstart"
+  echo ""
+
+  [[ "$#" == 0 ]] && usage
+
+  start $*
+
+  if [[ "$NETWROK" == "standalone" ]];then
+    echo "network: $NETWORK"
+  else
+    if [[ -z "$PRIVATE" || -z "$KEYSTOREPATH" ]];then
+      echo "type: FullNode; network: $NETWORK"
+    else
+      echo "type: Witness; network: $NETWORK"
+    fi
+  fi
+
+  copy_defaults
+
+  exec_service
+}
+
+function usage()
+{
+  echo "Usage: $0 [ --net vpioneer|mainnet|standalone ]
+                  [ --config CONFIG_FILE ]
+                  [ --private PRIVATE_KEY ]
+                  [ --keystorePath KEYSTORE_PATH ]"
+  exit 2
+}
+
+function start() {
+  PARSED_ARGUMENTS=$(getopt -o v --long verbose,net:,config:,private:,keystorePath: -- "$@")
+
+  eval set -- "$PARSED_ARGUMENTS"
+  while true
+  do
+    case "$1" in
+      -v|--verbose ) VERBOSE=true; shift ;;
+      --net) NETWORK="$2" ; shift 2 ;;
+      --config) CONFIG="$2" ; shift 2 ;;
+      --private)   PRIVATE="$2"   ; shift 2 ;;
+      --keystorePath)   KEYSTOREPATH="$2"   ; shift 2 ;;
+      # -- means the end of the arguments; drop this, and break out of the while loop
+      --) shift; break ;;
+      # If invalid options were passed, then getopt should have reported an error,
+      # which we checked as VALID_ARGUMENTS when getopt was called...
+      *) echo "Unexpected option: $1 - this should not happen."
+         usage ;;
+    esac
+  done
+}
+
+function copy_defaults() {
+  local CP="cp -a"
+
+  if [ -d $CONFIGHOME ]; then
+    echo "vision-core: config directory exists, skipping copy"
+  else
+    mkdir -p /data/vision/configs
+    $CP /opt/vision/"${NETWORK}"/configs/template.config $CONFIGHOME/"${NETWORK}".config
+  fi
+
+#  if [ -d DATABASEHOME ]; then
+#    echo "vision-core: output directory exists, please check"
+#  fi
+
+  case "$NETWORK" in
+  vpioneer)
+  # via command replace config such as localwitness
+    ;;
+  standalone)
+  # the same as above
+    ;;
+  *)
+    echo "Unknown network: '$NETWORK'" >&2
+    exit 1
+  esac
+}
+
+function exec_service() {
+  if [[ "$NETWROK" == "standalone" ]];then
+    /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -w --es
+  else
+    if [[ -z $PRIVATE ]];then
+      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/
+    else
+      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE
+    fi
+  fi
+}
+main "$@"
