@@ -16,7 +16,7 @@ function main() {
 
   start $*
 
-  if [[ "$NETWROK" == "standalone" ]];then
+  if [[ "$NETWORK" == "standalone" ]];then
     echo "network: $NETWORK"
   else
     if [[ -z "$PRIVATE" || -z "$KEYSTOREPATH" ]];then
@@ -33,7 +33,7 @@ function main() {
 
 function usage()
 {
-  echo "Usage: $0 [ --net vpioneer|mainnet|standalone ]
+  echo "Usage: $0 [ --net vpioneer|standalone ]
                   [ --config CONFIG_FILE ]
                   [ --private PRIVATE_KEY ]
                   [ --keystorePath KEYSTORE_PATH ]"
@@ -90,13 +90,13 @@ function copy_defaults() {
 }
 
 function exec_service() {
-  if [[ "$NETWROK" == "standalone" ]];then
+  if [[ "$NETWORK" == "standalone" ]];then
     /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -w --es
   else
     if [[ -z $PRIVATE ]];then
-      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/
+      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --es
     else
-      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE
+      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE -w --es
     fi
   fi
 }
