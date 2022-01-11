@@ -34,10 +34,9 @@ $ docker run -itd \
     -p 60071:60071 \
     -p 60081:60081 \
     --name vision-standalone \
-    maintainers/vpioneer:ultima_v1.0.2 --net standalone
+    maintainers/vision:ultima_v1.0.2 --net standalone
 ```
-#### `vpioneer`
-
+### vpioneer network
 ###### In vpioneer network mode, the node will join the vpioneer network.
 
 Actor: Fullnode
@@ -53,7 +52,7 @@ $ docker run -itd \
     -p 60071:60071 \
     -p 60081:60081 \
     --name vision-vpioneer \
-    maintainers/vpioneer:ultima_v1.0.2 --net vpioneer
+    maintainers/vision:ultima_v1.0.2 --net vpioneer
 ```
 
 Actor: Witness
@@ -69,5 +68,5 @@ $ docker run -itd \
     -p 60071:60071 \
     -p 60081:60081 \
     --name vision-vpioneer \
-    maintainers/vpioneer:ultima_v1.0.2 --net vpioneer --private <private-key>
+    maintainers/vision:ultima_v1.0.2 --net vpioneer --private <private-key>
 ```
