@@ -24,6 +24,7 @@ function main() {
     else
       echo "type: Witness; network: $NETWORK"
     fi
+    [[ "$ISDOWN" == "true" ]] && download
   fi
 
   copy_defaults
@@ -36,12 +37,23 @@ function usage()
   echo "Usage: $0 [ --net vpioneer|standalone ]
                   [ --config CONFIG_FILE ]
                   [ --private PRIVATE_KEY ]
-                  [ --keystorePath KEYSTORE_PATH ]"
+                  [ --keystorePath KEYSTORE_PATH ]
+                  [ --download]"
   exit 2
 }
 
+function download() {
+  echo ""
+  echo "Starting download data"
+  wget -q --show-progress --progress=dot:giga https://vpioneer-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/vpioneer-latest-RocksDB-database-image.tar.gz
+  echo "Download Done!"
+  echo "Starting uncompress"
+  tar -xzf vpioneer-latest-RocksDB-database-image.tar.gz -C /data/vision/
+  echo "Uncompressed!"
+}
+
 function start() {
-  PARSED_ARGUMENTS=$(getopt -o v --long verbose,net:,config:,private:,keystorePath: -- "$@")
+  PARSED_ARGUMENTS=$(getopt -o v --long verbose,net:,config:,private:,keystorePath:,download -- "$@")
 
   eval set -- "$PARSED_ARGUMENTS"
   while true
@@ -52,6 +64,7 @@ function start() {
       --config) CONFIG="$2" ; shift 2 ;;
       --private)   PRIVATE="$2"   ; shift 2 ;;
       --keystorePath)   KEYSTOREPATH="$2"   ; shift 2 ;;
+      --download)  ISDOWN=true; shift ;;
       # -- means the end of the arguments; drop this, and break out of the while loop
       --) shift; break ;;
       # If invalid options were passed, then getopt should have reported an error,
@@ -91,8 +104,10 @@ function copy_defaults() {
 
 function exec_service() {
   if [[ "$NETWORK" == "standalone" ]];then
+    echo "RUNNING...$NETWORK"
     /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -w --es
   else
+    echo "RUNNING...$NETWORK"
     if [[ -z $PRIVATE ]];then
       /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --es
     else

@@ -70,3 +70,6 @@ $ docker run -itd \
     --name vision-vpioneer \
     maintainers/vision:ultima_v1.0.2 --net vpioneer --private <private-key>
 ```
+
+### build locally
+```docker build --build-arg VISION_VERSION={BRANCH}_{VERSION} -t vision:test .```

@@ -14,7 +14,7 @@ RUN set -ex \
     && rm -rf /var/lib/apt/lists/* /tmp/*
 
 COPY ./ /opt/vision/
-RUN wget -Y off -O /opt/vision/FullNode.jar https://github.com/vision-consensus/vision-core/archive/refs/tags/${VISION_VERSION}.jar
+RUN wget -Y off -O /opt/vision/FullNode.jar https://github.com/vision-consensus/vision-core/releases/download/${VISION_VERSION}/FullNode.jar
 #RUN cp /opt/vision/vision.service /lib/systemd/system/
 #RUN chmod 644 /lib/systemd/system/vision.service && systemctl enable vision.service
 
