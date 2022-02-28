@@ -34,7 +34,7 @@ function main() {
 
 function usage()
 {
-  echo "Usage: $0 [ --net vpioneer|standalone ]
+  echo "Usage: $0 [ --net mainnet|vpioneer|standalone ]
                   [ --config CONFIG_FILE ]
                   [ --private PRIVATE_KEY ]
                   [ --keystorePath KEYSTORE_PATH ]
@@ -43,12 +43,20 @@ function usage()
 }
 
 function download() {
+  if [[ "$NETWORK" == "vpioneer" ]];then
+    URI='vpioneer'
+  elif [[ "$NETWORK" == "mainnet" ]];then
+    URI='mainnet'
+  else
+    echo "not support, remove option \"--download\" and try again."
+    exit 3
+  fi
   echo ""
   echo "Starting download data"
-  wget -q --show-progress --progress=dot:giga https://vpioneer-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/vpioneer-latest-RocksDB-database-image.tar.gz
+  wget -q --show-progress --progress=dot:giga https://${URI}-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/${URI}-latest-RocksDB-database-image.tar.gz
   echo "Download Done!"
   echo "Starting uncompress"
-  tar -xzf vpioneer-latest-RocksDB-database-image.tar.gz -C /data/vision/
+  tar -xzf ${URI}-latest-RocksDB-database-image.tar.gz -C /data/vision/
   echo "Uncompressed!"
 }
 
@@ -81,7 +89,7 @@ function copy_defaults() {
   if [ -d $CONFIGHOME ]; then
     echo "vision-core: config directory exists, skipping copy"
   else
-    mkdir -p /data/vision/configs
+    mkdir -p $CONFIGHOME
     $CP /opt/vision/"${NETWORK}"/configs/template.config $CONFIGHOME/"${NETWORK}".config
   fi
 
@@ -96,22 +104,26 @@ function copy_defaults() {
   standalone)
   # the same as above
     ;;
+  mainnet)
+  # the same as above
+    ;;
   *)
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
+    ;;
   esac
 }
 
 function exec_service() {
   if [[ "$NETWORK" == "standalone" ]];then
     echo "RUNNING...$NETWORK"
-    /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -w --es
+    /usr/bin/java -Xmx12g -XX:UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -w --es
   else
     echo "RUNNING...$NETWORK"
     if [[ -z $PRIVATE ]];then
-      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --es
+      /usr/bin/java -Xmx12g -XX:UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --es
     else
-      /usr/bin/java -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE -w --es
+      /usr/bin/java -Xmx12g -XX:UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE -w --es
     fi
   fi
 }
