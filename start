@@ -125,19 +125,19 @@ function copy_defaults() {
 function exec_service() {
   if [[ "$NETWORK" == "standalone" ]];then
     echo "RUNNING...$NETWORK"
-    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness --es
+    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
   else
     echo "RUNNING...$NETWORK"
     if [[ "$KEYSTORE" == "true" ]];then
       if [[ -z "$CONFIG_FILENAME" ]];then
-        /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness --es
+        /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
       else
-        /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${CONFIG_FILENAME}" --log-config /data/vision/logs/ --witness --es
+        /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${CONFIG_FILENAME}" --log-config /data/vision/logs/ --witness
       fi
     elif [[ -n $PRIVATE ]];then
-      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE --witness --es
+      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE --witness
     else
-      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --es
+      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/
     fi
   fi
 }
