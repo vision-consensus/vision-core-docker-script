@@ -2,7 +2,7 @@
 
 This docker image provides a simple way to run vision-core for development and testing.
 
-This image provides a mainnet chain.
+This image provides a vpioneer chain.
 
 ## Ports
 
@@ -17,8 +17,8 @@ This image provides a mainnet chain.
 | 60081 | PBFT rpc     | PBFT rpc port        |
 
 ## Usage
-### mainnet network
-###### In mainnet network mode, the node will join the mainnet network.
+### vpioneer network
+###### In vpioneer network mode, the node will join the vpioneer network.
 
 Actor: Fullnode
 ```
@@ -31,8 +31,8 @@ $ docker run -itd \
     -p 60061:60061 \
     -p 60071:60071 \
     -p 60081:60081 \
-    --name vision-mainnet-fullnode \
-    maintainers/vision-mainnet:latest
+    --name vision-vpioneer-fullnode \
+    maintainers/vision-vpioneer:latest
 ```
 
 Actor: Witness
@@ -46,8 +46,8 @@ $ docker run -itd \
     -p 60061:60061 \
     -p 60071:60071 \
     -p 60081:60081 \
-    --name vision-mainnet-witness \
-    maintainers//vision-mainnet:latest --private <private-key>
+    --name vision-vpioneer-witness \
+    maintainers//vision-vpioneer:latest --private <private-key>
 ```
 
 ### build locally

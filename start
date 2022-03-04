@@ -6,7 +6,7 @@ export TCMALLOC_RELEASE_RATE=10
 export VISION_HOME="/data/vision"
 export CONFIGHOME="$VISION_HOME/configs"
 export DATABASEHOME="$VISION_HOME/output-directory"
-export NETWORK="mainnet"
+export NETWORK="vpioneer"
 
 function main() {
   echo ""
@@ -44,10 +44,10 @@ function usage()
 function download() {
   echo ""
   echo "Starting download data"
-  wget -q --show-progress --progress=dot:giga https://mainnet-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/mainnet-latest-RocksDB-database-image.tar.gz
+  wget -q --show-progress --progress=dot:giga https://vpioneer-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/vpioneer-latest-RocksDB-database-image.tar.gz
   echo "Download Done!"
   echo "Starting uncompress"
-  tar -xzf mainnet-latest-RocksDB-database-image.tar.gz -C /data/vision/
+  tar -xzf vpioneer-latest-RocksDB-database-image.tar.gz -C /data/vision/
   echo "Uncompressed!"
 }
 
