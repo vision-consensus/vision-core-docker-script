@@ -13,9 +13,7 @@ function main() {
   echo "Starting Vision Quickstart"
   echo ""
 
-  [[ "$#" == 0 ]] && usage
-
-  start $*
+  [[ "$#" != 0 ]] && start $*
 
   if [[ "$KEYSTORE" == "true" ]];then
     if [[ -z "$CONFIG_FILENAME" ]];then
@@ -54,21 +52,22 @@ function download() {
 }
 
 function start() {
-  PARSED_ARGUMENTS=$(getopt -o v --long verbose,config:,private:,keystore,download -- "$@")
+  PARSED_ARGUMENTS=$(getopt -o c: --long config:,private:,keystore,download -n 'Error' -- "$@")
 
   eval set -- "$PARSED_ARGUMENTS"
+  KEYSTORE=false
+  ISDOWN=false
+  CONFIG_FILENAME=
+  PRIVATE=
   while true
   do
     case "$1" in
-      -v|--verbose ) VERBOSE=true; shift ;;
-      --config) CONFIG_FILENAME="$2" ; shift 2 ;;
+      -c|--config) CONFIG_FILENAME="$2" ; shift 2 ;;
       --private)   PRIVATE="$2"   ; shift 2 ;;
       --keystore)   KEYSTORE=true   ; shift ;;
       --download)  ISDOWN=true; shift ;;
       # -- means the end of the arguments; drop this, and break out of the while loop
       --) shift; break ;;
-      # If invalid options were passed, then getopt should have reported an error,
-      # which we checked as VALID_ARGUMENTS when getopt was called...
       *) echo "Unexpected option: $1 - this should not happen."
          usage ;;
     esac
