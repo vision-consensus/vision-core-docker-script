@@ -52,7 +52,7 @@ function download() {
 }
 
 function start() {
-  PARSED_ARGUMENTS=$(getopt -o c: --long config:,private:,keystore,download -n 'Error' -- "$@")
+  PARSED_ARGUMENTS=$(getopt -o '' --long config:,private:,keystore,download -n 'Error' -- "$@")
 
   eval set -- "$PARSED_ARGUMENTS"
   KEYSTORE=false
@@ -62,7 +62,7 @@ function start() {
   while true
   do
     case "$1" in
-      -c|--config) CONFIG_FILENAME="$2" ; shift 2 ;;
+      --config) CONFIG_FILENAME="$2" ; shift 2 ;;
       --private)   PRIVATE="$2"   ; shift 2 ;;
       --keystore)   KEYSTORE=true   ; shift ;;
       --download)  ISDOWN=true; shift ;;
