@@ -78,7 +78,7 @@ function copy_defaults() {
   local CP="cp -a"
 
   if [ -d $CONFIGHOME ]; then
-    echo "vision-core: config directory exists, skipping copy (or remove config directory, run again)"
+    echo "vision-core: config directory exists, skipping copy."
   else
     mkdir -p $CONFIGHOME
     if [[ -z "$CONFIG_FILENAME" ]];then
