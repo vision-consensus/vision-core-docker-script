@@ -6,6 +6,7 @@ export TCMALLOC_RELEASE_RATE=10
 export VISION_HOME="/data/vision"
 export CONFIGHOME="$VISION_HOME/configs"
 export DATABASEHOME="$VISION_HOME/output-directory"
+export NETWORK="mainnet"
 
 function main() {
   echo ""
@@ -16,22 +17,18 @@ function main() {
 
   start $*
 
-  if [[ "$NETWORK" == "standalone" ]];then
-    echo "network: $NETWORK"
-  else
-    if [[ "$KEYSTORE" == "true" ]];then
-      if [[ -z "$CONFIG_FILENAME" ]];then
-        echo "should define \"--config CONFIG_FILENAME\", exit."
-        exit 4
-      fi
-      echo "type: Witness; network: $NETWORK; run with keystore file."
-    elif [[ -n "$PRIVATE" ]];then
-      echo "type: Witness; network: $NETWORK; run with private directly(not recommended)!!!"
-    else
-      echo "type: FullNode; network: $NETWORK"
+  if [[ "$KEYSTORE" == "true" ]];then
+    if [[ -z "$CONFIG_FILENAME" ]];then
+      echo "should define \"--config CONFIG_FILENAME\", exit."
+      exit 4
     fi
-    [[ "$ISDOWN" == "true" ]] && download
+    echo "type: Witness; network: $NETWORK; run with keystore file."
+  elif [[ -n "$PRIVATE" ]];then
+    echo "type: Witness; network: $NETWORK; run with private directly."
+  else
+    echo "type: FullNode; network: $NETWORK"
   fi
+  [[ "$ISDOWN" == "true" ]] && download
 
   copy_defaults
 
@@ -40,41 +37,30 @@ function main() {
 
 function usage()
 {
-  echo "Usage: $0 [ --net mainnet|vpioneer|standalone ]
-                  [ --config CONFIG_FILENAME ]
+  echo "Usage: $0 [ --config CONFIG_FILENAME ]
                   [ --private PRIVATE_KEY ]
-                  [ --keystore ]
-                  [ --download ]"
+                  [ --keystore ]"
   exit 2
 }
 
 function download() {
-  if [[ "$NETWORK" == "vpioneer" ]];then
-    URI='vpioneer'
-  elif [[ "$NETWORK" == "mainnet" ]];then
-    URI='mainnet'
-  else
-    echo "not support, remove option \"--download\" and try again."
-    exit 3
-  fi
   echo ""
   echo "Starting download data"
-  wget -q --show-progress --progress=dot:giga https://${URI}-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/${URI}-latest-RocksDB-database-image.tar.gz
+  wget -q --show-progress --progress=dot:giga https://mainnet-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/mainnet-latest-RocksDB-database-image.tar.gz
   echo "Download Done!"
   echo "Starting uncompress"
-  tar -xzf ${URI}-latest-RocksDB-database-image.tar.gz -C /data/vision/
+  tar -xzf mainnet-latest-RocksDB-database-image.tar.gz -C /data/vision/
   echo "Uncompressed!"
 }
 
 function start() {
-  PARSED_ARGUMENTS=$(getopt -o v --long verbose,net:,config:,private:,keystore,download -- "$@")
+  PARSED_ARGUMENTS=$(getopt -o v --long verbose,config:,private:,keystore,download -- "$@")
 
   eval set -- "$PARSED_ARGUMENTS"
   while true
   do
     case "$1" in
       -v|--verbose ) VERBOSE=true; shift ;;
-      --net) NETWORK="$2" ; shift 2 ;;
       --config) CONFIG_FILENAME="$2" ; shift 2 ;;
       --private)   PRIVATE="$2"   ; shift 2 ;;
       --keystore)   KEYSTORE=true   ; shift ;;
@@ -100,45 +86,20 @@ function copy_defaults() {
       $CP /opt/vision/"${NETWORK}"/configs/template.config $CONFIGHOME/"${NETWORK}".config
     fi
   fi
-
-#  if [ -d DATABASEHOME ]; then
-#    echo "vision-core: output directory exists, please check"
-#  fi
-
-  case "$NETWORK" in
-  vpioneer)
-  # via command replace config such as localwitness
-    ;;
-  standalone)
-  # the same as above
-    ;;
-  mainnet)
-  # the same as above
-    ;;
-  *)
-    echo "Unknown network: '$NETWORK'" >&2
-    exit 1
-    ;;
-  esac
 }
 
 function exec_service() {
-  if [[ "$NETWORK" == "standalone" ]];then
-    echo "RUNNING...$NETWORK"
-    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
-  else
-    echo "RUNNING...$NETWORK"
-    if [[ "$KEYSTORE" == "true" ]];then
-      if [[ -z "$CONFIG_FILENAME" ]];then
-        /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
-      else
-        /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${CONFIG_FILENAME}" --log-config /data/vision/logs/ --witness
-      fi
-    elif [[ -n $PRIVATE ]];then
-      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE --witness
+  echo "RUNNING...$NETWORK"
+  if [[ "$KEYSTORE" == "true" ]];then
+    if [[ -z "$CONFIG_FILENAME" ]];then
+      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
     else
-      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/
+      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${CONFIG_FILENAME}" --log-config /data/vision/logs/ --witness
     fi
+  elif [[ -n $PRIVATE ]];then
+    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE --witness
+  else
+    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/
   fi
 }
 main "$@"
