@@ -6,72 +6,18 @@ export TCMALLOC_RELEASE_RATE=10
 export VISION_HOME="/data/vision"
 export CONFIGHOME="$VISION_HOME/configs"
 export DATABASEHOME="$VISION_HOME/output-directory"
-export NETWORK="mainnet"
+export NETWORK="standalone"
 
 function main() {
   echo ""
   echo "Starting Vision Quickstart"
   echo ""
-
-  [[ "$#" != 0 ]] && start $*
-
-  if [[ "$KEYSTORE" == "true" ]];then
-    if [[ -z "$CONFIG_FILENAME" ]];then
-      echo "should define \"--config CONFIG_FILENAME\", exit."
-      exit 4
-    fi
-    echo "type: Witness; network: $NETWORK; run with keystore file."
-  elif [[ -n "$PRIVATE" ]];then
-    echo "type: Witness; network: $NETWORK; run with private directly."
-  else
-    echo "type: FullNode; network: $NETWORK"
-  fi
-  [[ "$ISDOWN" == "true" ]] && download
+  echo "network: standalone"
+  echo ""
 
   copy_defaults
 
   exec_service
-}
-
-function usage()
-{
-  echo "Usage: $0 [ --config CONFIG_FILENAME ]
-                  [ --private PRIVATE_KEY ]
-                  [ --keystore ]"
-  exit 2
-}
-
-function download() {
-  echo ""
-  echo "Starting download data"
-  wget -q --show-progress --progress=dot:giga https://mainnet-current-data-images.s3.us-east-2.amazonaws.com/RocksDB/FullNode/mainnet-latest-RocksDB-database-image.tar.gz
-  echo "Download Done!"
-  echo "Starting uncompress"
-  tar -xzf mainnet-latest-RocksDB-database-image.tar.gz -C /data/vision/
-  echo "Uncompressed!"
-}
-
-function start() {
-  PARSED_ARGUMENTS=$(getopt -o '' --long config:,private:,keystore,download -n 'Error' -- "$@")
-
-  eval set -- "$PARSED_ARGUMENTS"
-  KEYSTORE=false
-  ISDOWN=false
-  CONFIG_FILENAME=
-  PRIVATE=
-  while true
-  do
-    case "$1" in
-      --config) CONFIG_FILENAME="$2" ; shift 2 ;;
-      --private)   PRIVATE="$2"   ; shift 2 ;;
-      --keystore)   KEYSTORE=true   ; shift ;;
-      --download)  ISDOWN=true; shift ;;
-      # -- means the end of the arguments; drop this, and break out of the while loop
-      --) shift; break ;;
-      *) echo "Unexpected option: $1 - this should not happen."
-         usage ;;
-    esac
-  done
 }
 
 function copy_defaults() {
@@ -89,16 +35,6 @@ function copy_defaults() {
 
 function exec_service() {
   echo "RUNNING...$NETWORK"
-  if [[ "$KEYSTORE" == "true" ]];then
-    if [[ -z "$CONFIG_FILENAME" ]];then
-      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
-    else
-      /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${CONFIG_FILENAME}" --log-config /data/vision/logs/ --witness
-    fi
-  elif [[ -n $PRIVATE ]];then
-    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ -p $PRIVATE --witness
-  else
-    /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/
-  fi
+  /usr/bin/java -Xmx12g -XX:+UseConcMarkSweepGC -jar /opt/vision/FullNode.jar -c $CONFIGHOME/"${NETWORK}".config --log-config /data/vision/logs/ --witness
 }
-main "$@"
+main
